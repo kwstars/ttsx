@@ -179,56 +179,101 @@ func (this *UserController) UserLogout() {
 }
 
 // 用户中心
-func (this *UserController) ShowUserCenterInfo() {
+func GetUser(this *UserController) {
 	userName := this.GetSession("userName")
-	this.Data["userName"] = userName
+	if userName == nil {
+		this.Data["userName"] = ""
+	} else {
+		this.Data["userName"] = userName.(string)
+	}
+}
+
+func (this *UserController) ShowUserCenterInfo() {
+	GetUser(this)
+	currentLoginUser := this.GetSession("userName")
+
+	o := orm.NewOrm()
+	var receiver models.Receiver
+	qs := o.QueryTable("Receiver").RelatedSel("User").Filter("User__UserName", currentLoginUser.(string))
+	qs.Filter("IsDefault", true).One(&receiver)
+
+	this.Data["receiver"] = receiver
 	this.Layout = "layout.html"
 	this.TplName = "user_center_info.html"
 }
 
 func (this *UserController) ShowUserCenterOrder() {
-	userName := this.GetSession("userName")
-	this.Data["userName"] = userName
+	GetUser(this)
 	this.Layout = "layout.html"
 	this.TplName = "user_center_order.html"
 }
 
 func (this *UserController) ShowUserCenterSite() {
+	GetUser(this)
 	userName := this.GetSession("userName")
-	this.Data["userName"] = userName
 
 	// 显示地址
+	o := orm.NewOrm()
+	var receiver models.Receiver
+	qs := o.QueryTable("Receiver").RelatedSel("User").Filter("User__UserName", userName.(string))
+	qs.Filter("IsDefault", true).One(&receiver)
+
+	this.Data["receiver"] = receiver
 
 	this.Layout = "layout.html"
 	this.TplName = "user_center_site.html"
 }
 
 func (this *UserController) HeandleShowUserCenterSite() {
-	currentLoginUser := this.GetSession("userName").(string)
+	currentLoginUser := this.GetSession("userName")
 	name := this.GetString("name")
 	zipCode := this.GetString("zipcode")
 	addr := this.GetString("addr")
 	phone := this.GetString("phone")
 
+	// 校验数据不能为空
+	if name == "" || addr == "" || zipCode == "" || phone == "" {
+		this.Data["errmsg"] = "添加地址数据不能为空"
+		this.TplName = "user_center_site.html"
+		return
+	}
+
+	// 校验邮箱地址
+
+	// 校验手机号码
+
 	o := orm.NewOrm()
 	var receiver models.Receiver
 	receiver.Name = name
+	receiver.Phone = phone
 	receiver.ZipCode = zipCode
 	receiver.Addr = addr
-	receiver.Phone = phone
 	receiver.IsDefault = true
 
 	var user models.User
-	user.UserName = currentLoginUser
-	o.Read(&user, "userName")
+	user.UserName = currentLoginUser.(string)
+	o.Read(&user, "UserName")
 	receiver.User = &user
-	id, err := o.Insert(&receiver)
+
+	o.Begin()
+	num, err := o.QueryTable("Receiver").RelatedSel("User").Filter("User__Id", user.Id).Update(orm.Params{"IsDefault": false})
+	//count, err := qs.Filter("IsDefault", true).
+	beego.Info("update记录数", num)
 	if err != nil {
-		beego.Error("插入receiver错误", err)
-		err = o.Rollback()
-		this.Redirect("/goods/userCenterSite", 302)
-		return
+		beego.Error("update数据错误 ", err)
+		o.Rollback()
 	}
-	beego.Info("插入的主键是 ", id)
+
+	insertId, err := o.Insert(&receiver)
+	beego.Info("primary key", insertId)
+	if err != nil {
+		beego.Error("insert数据错误 ", err)
+		o.Rollback()
+	}
+	err = o.Commit()
+	if err != nil {
+		beego.Error("用户地址数据更新错误", err)
+	}
+
 	this.Redirect("/goods/userCenterSite", 302)
 }

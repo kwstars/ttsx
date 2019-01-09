@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"ttsx/models"
 	"github.com/gomodule/redigo/redis"
+	"math"
 )
 
 type GoodsController struct {
@@ -20,40 +21,41 @@ func (this *GoodsController) ShowIndex() {
 	}
 
 	o := orm.NewOrm()
+	// 查询商品类型
 	var goodsTypes []models.GoodsType
-	//查询所有的商品类型
 	o.QueryTable("GoodsType").All(&goodsTypes)
 	this.Data["goodsTypes"] = goodsTypes
 
-	//获取轮播图
-	var goodsLunbo []models.IndexGoodsBanner
-	o.QueryTable("IndexGoodsBanner").OrderBy("Index").All(&goodsLunbo)
-	this.Data["goodsLunbo"] = goodsLunbo
+	// 查询商品轮播图
+	var goodsBanner []models.IndexGoodsBanner
+	o.QueryTable("IndexGoodsBanner").OrderBy("Index").All(&goodsBanner)
+	this.Data["goodsBanner"] = goodsBanner
 
-	//获取促销商品
-	var goodsPro []models.IndexPromotionBanner
-	o.QueryTable("IndexPromotionBanner").OrderBy("Index").All(&goodsPro)
-	this.Data["goodsPro"] = goodsPro
+	// 查询促销商品
+	var promotionBanner []models.IndexPromotionBanner
+	o.QueryTable("IndexPromotionBanner").OrderBy("Index").All(&promotionBanner)
+	this.Data["promotionBanner"] = promotionBanner
 
 	//获取分类商品展示
 	var goods []map[string]interface{}
-	for _, v := range goodsTypes {
+	for _, goodsType := range goodsTypes {
 		temp := make(map[string]interface{})
-		temp["goodsType"] = v
+		temp["goodsType"] = goodsType
 		goods = append(goods, temp)
 	}
 
-	for _, v := range goods {
-		qs := o.QueryTable("IndexTypeGoodsBanner").RelatedSel("GoodsSKU", "GoodsType").Filter("GoodsType", v["goodsType"])
+	var goodsText []models.IndexTypeGoodsBanner
+	var goodsImage []models.IndexTypeGoodsBanner
 
-		var goodsText []models.IndexTypeGoodsBanner
-		qs.Filter("DisplayType", 0).OrderBy("Index").All(&goodsText)
+	for _, goodsMap := range goods {
+		o.QueryTable("IndexTypeGoodsBanner").RelatedSel("GoodsSKU", "GoodsType").
+			Filter("GoodsType", goodsMap["goodsType"]).Filter("DisplayType", 0).OrderBy("Index").All(&goodsText)
 
-		var goodsImage []models.IndexTypeGoodsBanner
-		qs.Filter("DisplayType", 1).OrderBy("Index").All(&goodsImage)
+		o.QueryTable("IndexTypeGoodsBanner").RelatedSel("GoodsSKU", "GoodsType").
+			Filter("GoodsType", goodsMap["goodsType"]).Filter("DisplayType", 1).OrderBy("Index").All(&goodsImage)
 
-		v["goodsText"] = goodsText
-		v["goodsImage"] = goodsImage
+		goodsMap["goodsText"] = goodsText
+		goodsMap["goodsImage"] = goodsImage
 	}
 
 	this.Data["goods"] = goods
@@ -76,7 +78,8 @@ func (this *GoodsController) ShowDetail() {
 	o.QueryTable("GoodsType").All(&goodsTypes)
 
 	var newGoods []models.GoodsSKU
-	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType", goodsSku).OrderBy("Time").Limit(2, 0).All(&newGoods)
+	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType", goodsSku).
+		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
 	this.Data["goodsSku"] = goodsSku
 	this.Data["goodsTypes"] = goodsTypes
@@ -93,7 +96,68 @@ func (this *GoodsController) ShowDetail() {
 		defer conn.Close()
 		conn.Do("lrem", "history_"+userName.(string), 0, goodsId)
 		conn.Do("lpush", "history_"+userName.(string), goodsId)
+		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
 	this.TplName = "detail.html"
+}
+
+// 分页
+func pageEditor(pageCount, pageIndex int) []int {
+	var pages []int
+	if pageCount < 5 {
+		pages = make([]int, pageCount)
+		for i := 1; i < pageCount; i++ {
+			pages[i-1] = i
+		}
+	} else if pageIndex <= 3 {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = i
+		}
+	} else if pageIndex >= pageCount-2 {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = pageCount - 5 + i
+		}
+	} else {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = pageIndex - 3 + i
+		}
+	}
+	return pages
+}
+
+func (this *GoodsController) ShowList() {
+	typeId, err := this.GetInt("typeId")
+	if err != nil {
+		beego.Error("获取类型ID错误")
+		this.Redirect("/", 302)
+		return
+	}
+
+	// 获取当前类型的商品
+	o := orm.NewOrm()
+	var goodsSkus []models.GoodsSKU
+	qs := o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId)
+	qs.All(&goodsSkus)
+	count, err := qs.Count()
+	if err != nil {
+		beego.Error("请求连接错误")
+		this.Redirect("/", 302)
+		return
+	}
+
+	pageSize := 1
+	pageCount := math.Ceil(float64(count) / float64(pageSize))
+	pageIndex, err := this.GetInt("pageIndex")
+	if err != nil {
+		pageIndex = 1
+	}
+	pages := pageEditor(int(pageCount), pageIndex)
+
+	this.Data["pages"] = pages
+	this.Data["goodsSkus"] = goodsSkus
+	this.TplName = "list.html"
 }

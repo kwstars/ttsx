@@ -41,7 +41,7 @@
 </div>
 
 <div class="search_bar clearfix">
-    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    <a href="index.html" class="logo fl"><img src="/static/images/logo.png"></a>
     <div class="search_con fl">
         <input type="text" class="input_text fl" name="" placeholder="搜索商品">
         <input type="button" class="input_btn fr" name="" value="搜索">
@@ -67,13 +67,15 @@
 
 <div class="center_con clearfix">
     <ul class="subnav fl">
+    {{/*类型数据*/}}
     {{range .goodsTypes}}
-        <li><a href="#model01" class="{{.Logo}}">{{.Name}}</a></li>
+        <li><a href="/list?typeId={{.Id}}" class="{{.Logo}}">{{.Name}}</a></li>
     {{end}}
     </ul>
     <div class="slide fl">
         <ul class="slide_pics">
-        {{range .goodsLunbo}}
+        {{/*轮播图*/}}
+        {{range .goodsBanner}}
             <li><img src="http://192.168.111.132:8888/{{.Image}}" alt="幻灯片"></li>
         {{end}}
         </ul>
@@ -82,20 +84,23 @@
         <ul class="points"></ul>
     </div>
     <div class="adv fl">
-    {{range .goodsPro}}
+    {{/*促销商品*/}}
+    {{range .promotionBanner}}
         <a href="#"><img src="http://192.168.111.132:8888/{{.Image}}"></a>
     {{end}}
     </div>
 </div>
 
+{{/*首页商品*/}}
 {{range $key,$value := .goods}}
 <div class="list_model">
     <div class="list_title clearfix">
         <h3 class="fl" id="model01">{{$value.goodsType.Name}}</h3>
         <div class="subtitle fl">
             <span>|</span>
+        {{/*文子商品数据*/}}
         {{range $value.goodsText}}
-            <a href="#">{{.GoodsSKU.Name}}</a>
+            <a href="/detail?goodsId={{.GoodsSKU.Id}}">{{.GoodsSKU.Name}}</a>
         {{end}}
         </div>
         <a href="#" class="goods_more fr" id="fruit_more">查看更多 ></a>
@@ -104,6 +109,7 @@
     <div class="goods_con clearfix">
         <div class="goods_banner fl"><img src="http://192.168.111.132:8888/{{$value.goodsType.Image}}"></div>
         <ul class="goods_list fl">
+        {{/*图片商品数据*/}}
         {{range $value.goodsImage}}
             <li>
                 <h4><a href="/detail?goodsId={{.GoodsSKU.Id}}">{{.GoodsSKU.Name}}</a></h4>

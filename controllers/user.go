@@ -217,8 +217,8 @@ func (this *UserController) ShowUserCenterInfo() {
 	}
 
 	this.Data["goods"] = goods
-
 	this.Data["receiver"] = receiver
+
 	this.Layout = "layout.html"
 	this.TplName = "user_center_info.html"
 }

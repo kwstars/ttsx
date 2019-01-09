@@ -7,6 +7,7 @@ import (
 	"ttsx/models"
 	"github.com/astaxie/beego/utils"
 	"strconv"
+	"github.com/gomodule/redigo/redis"
 )
 
 type UserController struct {
@@ -196,6 +197,26 @@ func (this *UserController) ShowUserCenterInfo() {
 	var receiver models.Receiver
 	qs := o.QueryTable("Receiver").RelatedSel("User").Filter("User__UserName", currentLoginUser.(string))
 	qs.Filter("IsDefault", true).One(&receiver)
+
+	// 获取最近游览记录
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		beego.Error("redis连接失败")
+		return
+	}
+	defer conn.Close()
+	res, err := redis.Ints(conn.Do("lrange", "history_"+currentLoginUser.(string), 0, 4))
+
+	var goods []models.GoodsSKU
+
+	for _, goodsId := range res {
+		var goodsSku models.GoodsSKU
+		goodsSku.Id = goodsId
+		o.Read(&goodsSku)
+		goods = append(goods, goodsSku)
+	}
+
+	this.Data["goods"] = goods
 
 	this.Data["receiver"] = receiver
 	this.Layout = "layout.html"

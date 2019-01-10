@@ -111,17 +111,17 @@ func (this *GoodsController) ShowDetail() {
 	}
 
 	o := orm.NewOrm()
+	// 商品的SKU
 	var goodsSku models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("Goods", "GoodsType").Filter("Id", goodsId).One(&goodsSku)
 
+	// 查询所有商品类别
 	showGoodsTypes(this)
 
+	// 新品推荐
 	var newGoods []models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType", goodsSku).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
-
-	this.Data["goodsSku"] = goodsSku
-	this.Data["newGoods"] = newGoods
 
 	// 最近商品游览记录保存到redis
 	userName := this.GetSession("userName")
@@ -137,8 +137,9 @@ func (this *GoodsController) ShowDetail() {
 		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
-	//this.Data["loginUser"] = loginUser
 	this.Layout = "layout.html"
+	this.Data["goodsSku"] = goodsSku
+	this.Data["newGoods"] = newGoods
 	this.Data["goodsId"] = goodsId
 	this.TplName = "detail.html"
 }
@@ -147,7 +148,7 @@ func (this *GoodsController) ShowList() {
 	GetGoodsUser(this)
 	typeId, err := this.GetInt("typeId")
 	if err != nil {
-		beego.Error("获取类型ID错误")
+		beego.Error("获取类型ID错误",err)
 		this.Redirect("/", 302)
 		return
 	}
@@ -202,6 +203,8 @@ func (this *GoodsController) ShowList() {
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
+	goodsType := newGoods[0].GoodsType.Name
+
 	this.Data["newGoods"] = newGoods
 	this.Data["sort"] = sort
 	this.Data["typeId"] = typeId
@@ -211,7 +214,7 @@ func (this *GoodsController) ShowList() {
 
 	this.Data["pages"] = pages
 	this.Data["goodsSkus"] = goodsSkus
-
+	this.Data["goodsType"] = goodsType
 	this.Layout = "layout.html"
 	this.TplName = "list.html"
 }

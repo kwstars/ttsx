@@ -16,6 +16,7 @@ type GoodsController struct {
 func showGoodsTypes(this *GoodsController) (goodsTypes []models.GoodsType) {
 	o := orm.NewOrm()
 	o.QueryTable("GoodsType").All(&goodsTypes)
+	this.Data["goodsTypes"] = goodsTypes
 	return goodsTypes
 }
 
@@ -96,7 +97,6 @@ func (this *GoodsController) ShowIndex() {
 	}
 
 	this.Layout = "layout.html"
-	this.Data["goodsTypes"] = goodsTypes
 	this.Data["goods"] = goods
 	this.TplName = "index.html"
 }
@@ -114,15 +114,13 @@ func (this *GoodsController) ShowDetail() {
 	var goodsSku models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("Goods", "GoodsType").Filter("Id", goodsId).One(&goodsSku)
 
-	var goodsTypes []models.GoodsType
-	o.QueryTable("GoodsType").All(&goodsTypes)
+	showGoodsTypes(this)
 
 	var newGoods []models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType", goodsSku).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
 	this.Data["goodsSku"] = goodsSku
-	this.Data["goodsTypes"] = goodsTypes
 	this.Data["newGoods"] = newGoods
 
 	// 最近商品游览记录保存到redis
@@ -154,7 +152,7 @@ func (this *GoodsController) ShowList() {
 		return
 	}
 
-	goodsTypes := showGoodsTypes(this)
+	showGoodsTypes(this)
 
 	// 获取当前类型的商品
 	o := orm.NewOrm()
@@ -204,7 +202,6 @@ func (this *GoodsController) ShowList() {
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
-	this.Data["goodsTypes"] = goodsTypes
 	this.Data["newGoods"] = newGoods
 	this.Data["sort"] = sort
 	this.Data["typeId"] = typeId

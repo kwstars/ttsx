@@ -17,12 +17,12 @@
             <span></span>
             <ul class="subnav">
             {{range .goodsTypes}}
-                <li><a href="#" class="{{.Logo}}">{{.Name}}</a></li>
+                <li><a href="/list?typeId={{.Id}}" class="{{.Logo}}">{{.Name}}</a></li>
             {{end}}
             </ul>
         </div>
         <ul class="navlist fl">
-            <li><a href="">首页</a></li>
+            <li><a href="/">首页</a></li>
             <li class="interval">|</li>
             <li><a href="">手机生鲜</a></li>
             <li class="interval">|</li>

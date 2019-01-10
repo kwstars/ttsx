@@ -99,6 +99,7 @@ func (this *GoodsController) ShowDetail() {
 		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
+	this.Data["goodsId"] = goodsId
 	this.TplName = "detail.html"
 }
 
@@ -180,6 +181,12 @@ func (this *GoodsController) ShowList() {
 		nextIndex = pageIndex + 1
 	}
 
+	// 新品推荐
+	var newGoods []models.GoodsSKU
+	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
+		OrderBy("Time").Limit(2, 0).All("newGoods")
+
+	this.Data["newGoods"] = newGoods
 	this.Data["sort"] = sort
 	this.Data["typeId"] = typeId
 	this.Data["preIndex"] = preIndex

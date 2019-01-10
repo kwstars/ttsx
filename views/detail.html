@@ -95,7 +95,7 @@
         <div class="total">总价：<em>{{.goodsSku.Price}}元</em></div>
         <div class="operate_btn">
             <a href="javascript:;" class="buy_btn">立即购买</a>
-            <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+            <a href="javascript:;" class="add_cart" goodsId="{{.goodsSku.Id}}" id="add_cart">加入购物车</a>
         </div>
     </div>
 </div>
@@ -148,8 +148,43 @@
 </div>
 <div class="add_jump"></div>
 
-<script type="text/javascript" src="js/jquery-1.12.2.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
 <script type="text/javascript">
+    CountTotalPrice();
+
+    function CountTotalPrice() {
+        price = $(".show_pirze").children("em").text();
+        count = $(".num_show").val();
+        totalPrice = parseFloat(price) * parseInt(count);
+        $(".total").children("em").text(totalPrice.toFixed(2) + "元")
+    }
+
+    $(".add").click(function () {
+        count = $(".num_show").val();
+        count = parseInt(count) + 1;
+        $(".num_show").val(count);
+        CountTotalPrice()
+    });
+
+    $(".minus").click(function () {
+        count = $(".num_show").val();
+        count = parseInt(count) - 1;
+        if (count < 1) {
+            count = 1
+        }
+        $(".num_show").val(count);
+        CountTotalPrice();
+    });
+
+    $(".num_show").blur(function () {
+        count = $(".num_show").val();
+        if (isNaN(count) || count < 1 || count.trim().lenght == 0) {
+            count = 1
+        }
+        $(".num_show").val(parseInt(count));
+        CountTotalPrice()
+    });
+
     var $add_x = $('#add_cart').offset().top;
     var $add_y = $('#add_cart').offset().left;
 
@@ -158,6 +193,19 @@
 
     $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
     $('#add_cart').click(function () {
+
+        goodsCount = $(".num_show").val();
+        goodsId = $("#add_cart").attr("goodsId");
+        params = {"goodsId": goodsId, "goodsCount": count}
+
+        $.post("/goods/addCart", params, function (data) {
+            if (data.errno == 5) {
+                alert(data.errmsg)
+            } else {
+                alert(data.errmsg)
+            }
+        });
+
         $(".add_jump").stop().animate({
                     'left': $to_y + 7,
                     'top': $to_x + 7

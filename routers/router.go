@@ -28,6 +28,8 @@ func init() {
 	beego.Router("/goods/userCenterOrder", &controllers.UserController{}, "get:ShowUserCenterOrder")
 	beego.Router("/goods/userCenterSite", &controllers.UserController{}, "get:ShowUserCenterSite;post:HeandleShowUserCenterSite")
 
+	// 购物车
+	beego.Router("/goods/addCart", &controllers.AddCartController{},"post:HandleAddCart")
 }
 
 func filterFunc(ctx *context.Context) {

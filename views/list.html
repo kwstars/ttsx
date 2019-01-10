@@ -79,16 +79,13 @@
         <div class="new_goods">
             <h3>新品推荐</h3>
             <ul>
+            {{range .newGoods}}
                 <li>
-                    <a href="#"><img src="images/goods/goods001.jpg"></a>
-                    <h4><a href="#">进口柠檬</a></h4>
-                    <div class="prize">￥3.90</div>
+                    <a href="/detail?goodsId={{.Id}}"><img src="http://192.168.111.132:8888/{{.Image}}"></a>
+                    <h4><a href="/detail?goodsId={{.Id}}">{{.Name}}</a></h4>
+                    <div class="prize">{{.Price}}</div>
                 </li>
-                <li>
-                    <a href="#"><img src="images/goods/goods002.jpg"></a>
-                    <h4><a href="#">玫瑰香葡萄</a></h4>
-                    <div class="prize">￥16.80</div>
-                </li>
+            {{end}}
             </ul>
         </div>
     </div>
@@ -117,7 +114,8 @@
         <div class="pagenation">
             <a href="/list?pageIndex={{.preIndex}}&typeId={{.typeId}}&sort={{.sort}}">上一页</a>
         {{range $key,$value := .pages}}
-            <a href="/list?pageIndex={{$value}}&typeId={{$.typeId}}&sort={{$.sort}}"{{if compare $.pageIndex $value}}class="active"{{end}}>{{$value}}</a>
+            <a href="/list?pageIndex={{$value}}&typeId={{$.typeId}}&sort={{$.sort}}"
+               {{if compare $.pageIndex $value}}class="active"{{end}}>{{$value}}</a>
         {{end}}
             <a href="/list?pageIndex={{.nextIndex}}&typeId={{.typeId}}&sort={{.sort}}">下一页></a>
         </div>

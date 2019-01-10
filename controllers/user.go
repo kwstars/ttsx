@@ -179,19 +179,19 @@ func (this *UserController) UserLogout() {
 	this.Redirect("/", 302)
 }
 
-// 用户中心
-func GetUser(this *UserController) {
-	userName := this.GetSession("userName")
+// 获取当前登陆的用户
+func GetUser(this *UserController) (userName interface{}) {
+	userName = this.GetSession("userName")
 	if userName == nil {
 		this.Data["userName"] = ""
 	} else {
 		this.Data["userName"] = userName.(string)
 	}
+	return
 }
 
 func (this *UserController) ShowUserCenterInfo() {
-	GetUser(this)
-	currentLoginUser := this.GetSession("userName")
+	currentLoginUser := GetUser(this)
 
 	o := orm.NewOrm()
 	var receiver models.Receiver

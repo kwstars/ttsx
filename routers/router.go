@@ -29,7 +29,7 @@ func init() {
 	beego.Router("/goods/userCenterSite", &controllers.UserController{}, "get:ShowUserCenterSite;post:HeandleShowUserCenterSite")
 
 	// 购物车
-	beego.Router("/goods/addCart", &controllers.AddCartController{},"post:HandleAddCart")
+	beego.Router("/cart", &controllers.CartController{},"get:ShowCart;post:HandleAddCart")
 }
 
 func filterFunc(ctx *context.Context) {

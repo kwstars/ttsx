@@ -12,19 +12,56 @@ type GoodsController struct {
 	beego.Controller
 }
 
-func (this *GoodsController) ShowIndex() {
-	currentLoginUser := this.GetSession("userName")
-	if currentLoginUser == nil {
+// 查询商品类型
+func showGoodsTypes(this *GoodsController) (goodsTypes []models.GoodsType) {
+	o := orm.NewOrm()
+	o.QueryTable("GoodsType").All(&goodsTypes)
+	return goodsTypes
+}
+
+// 详情页分页
+func pageEditor(pageCount, pageIndex int) []int {
+	var pages []int
+	if pageCount < 5 {
+		pages = make([]int, pageCount)
+		for i := 1; i <= pageCount; i++ {
+			pages[i-1] = i
+		}
+	} else if pageIndex <= 3 {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = i
+		}
+	} else if pageIndex >= pageCount-2 {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = pageCount - 5 + i
+		}
+	} else {
+		pages = make([]int, 5)
+		for i := 1; i <= 5; i++ {
+			pages[i-1] = pageIndex - 3 + i
+		}
+	}
+	return pages
+}
+
+// 获取当前登陆的用户
+func GetGoodsUser(this *GoodsController) (userName interface{}) {
+	userName = this.GetSession("userName")
+	if userName == nil {
 		this.Data["userName"] = ""
 	} else {
-		this.Data["userName"] = currentLoginUser.(string)
+		this.Data["userName"] = userName.(string)
 	}
+	return
+}
 
+func (this *GoodsController) ShowIndex() {
+	GetGoodsUser(this)
 	o := orm.NewOrm()
 	// 查询商品类型
-	var goodsTypes []models.GoodsType
-	o.QueryTable("GoodsType").All(&goodsTypes)
-	this.Data["goodsTypes"] = goodsTypes
+	goodsTypes := showGoodsTypes(this)
 
 	// 查询商品轮播图
 	var goodsBanner []models.IndexGoodsBanner
@@ -58,11 +95,14 @@ func (this *GoodsController) ShowIndex() {
 		goodsMap["goodsImage"] = goodsImage
 	}
 
+	this.Layout = "layout.html"
+	this.Data["goodsTypes"] = goodsTypes
 	this.Data["goods"] = goods
 	this.TplName = "index.html"
 }
 
 func (this *GoodsController) ShowDetail() {
+	GetGoodsUser(this)
 	goodsId, err := this.GetInt("goodsId")
 	if err != nil {
 		beego.Error("请求连接错误")
@@ -99,44 +139,22 @@ func (this *GoodsController) ShowDetail() {
 		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
+	//this.Data["loginUser"] = loginUser
+	this.Layout = "layout.html"
 	this.Data["goodsId"] = goodsId
 	this.TplName = "detail.html"
 }
 
-// 分页
-func pageEditor(pageCount, pageIndex int) []int {
-	var pages []int
-	if pageCount < 5 {
-		pages = make([]int, pageCount)
-		for i := 1; i <= pageCount; i++ {
-			pages[i-1] = i
-		}
-	} else if pageIndex <= 3 {
-		pages = make([]int, 5)
-		for i := 1; i <= 5; i++ {
-			pages[i-1] = i
-		}
-	} else if pageIndex >= pageCount-2 {
-		pages = make([]int, 5)
-		for i := 1; i <= 5; i++ {
-			pages[i-1] = pageCount - 5 + i
-		}
-	} else {
-		pages = make([]int, 5)
-		for i := 1; i <= 5; i++ {
-			pages[i-1] = pageIndex - 3 + i
-		}
-	}
-	return pages
-}
-
 func (this *GoodsController) ShowList() {
+	GetGoodsUser(this)
 	typeId, err := this.GetInt("typeId")
 	if err != nil {
 		beego.Error("获取类型ID错误")
 		this.Redirect("/", 302)
 		return
 	}
+
+	goodsTypes := showGoodsTypes(this)
 
 	// 获取当前类型的商品
 	o := orm.NewOrm()
@@ -184,8 +202,9 @@ func (this *GoodsController) ShowList() {
 	// 新品推荐
 	var newGoods []models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
-		OrderBy("Time").Limit(2, 0).All("newGoods")
+		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
+	this.Data["goodsTypes"] = goodsTypes
 	this.Data["newGoods"] = newGoods
 	this.Data["sort"] = sort
 	this.Data["typeId"] = typeId
@@ -195,5 +214,7 @@ func (this *GoodsController) ShowList() {
 
 	this.Data["pages"] = pages
 	this.Data["goodsSkus"] = goodsSkus
+
+	this.Layout = "layout.html"
 	this.TplName = "list.html"
 }

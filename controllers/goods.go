@@ -107,7 +107,7 @@ func pageEditor(pageCount, pageIndex int) []int {
 	var pages []int
 	if pageCount < 5 {
 		pages = make([]int, pageCount)
-		for i := 1; i < pageCount; i++ {
+		for i := 1; i <= pageCount; i++ {
 			pages[i-1] = i
 		}
 	} else if pageIndex <= 3 {
@@ -141,7 +141,6 @@ func (this *GoodsController) ShowList() {
 	o := orm.NewOrm()
 	var goodsSkus []models.GoodsSKU
 	qs := o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId)
-	qs.All(&goodsSkus)
 	count, err := qs.Count()
 	if err != nil {
 		beego.Error("请求连接错误")
@@ -149,13 +148,43 @@ func (this *GoodsController) ShowList() {
 		return
 	}
 
-	pageSize := 1
+	pageSize := 2
 	pageCount := math.Ceil(float64(count) / float64(pageSize))
 	pageIndex, err := this.GetInt("pageIndex")
 	if err != nil {
 		pageIndex = 1
 	}
 	pages := pageEditor(int(pageCount), pageIndex)
+
+	start := (pageIndex - 1) * pageSize
+
+	sort := this.GetString("sort")
+	if sort == "" {
+		qs.Limit(pageSize, start).All(&goodsSkus)
+	} else if sort == "price" {
+		qs.OrderBy("Price").Limit(pageSize, start).All(&goodsSkus)
+	} else {
+		qs.OrderBy("Sales").Limit(pageSize, start).All(&goodsSkus)
+	}
+
+	var preIndex, nextIndex int
+	if pageIndex == 1 {
+		preIndex = 1
+	} else {
+		preIndex = pageIndex - 1
+	}
+
+	if pageIndex == int(pageCount) {
+		nextIndex = int(pageCount)
+	} else {
+		nextIndex = pageIndex + 1
+	}
+
+	this.Data["sort"] = sort
+	this.Data["typeId"] = typeId
+	this.Data["preIndex"] = preIndex
+	this.Data["nextIndex"] = nextIndex
+	this.Data["pageIndex"] = pageIndex
 
 	this.Data["pages"] = pages
 	this.Data["goodsSkus"] = goodsSkus

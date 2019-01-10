@@ -98,7 +98,7 @@
         <h3 class="fl" id="model01">{{$value.goodsType.Name}}</h3>
         <div class="subtitle fl">
             <span>|</span>
-        {{/*文子商品数据*/}}
+        {{/*文字商品数据*/}}
         {{range $value.goodsText}}
             <a href="/detail?goodsId={{.GoodsSKU.Id}}">{{.GoodsSKU.Name}}</a>
         {{end}}

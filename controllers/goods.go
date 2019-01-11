@@ -140,7 +140,6 @@ func (this *GoodsController) ShowDetail() {
 		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
-	this.Layout = "layout_goods.html"
 	this.Data["goodsSku"] = goodsSku
 	this.Data["newGoods"] = newGoods
 	this.Data["goodsId"] = goodsId
@@ -230,7 +229,6 @@ func (this *GoodsController) ShowList() {
 	}
 	beego.Info(preIndex, pageIndex, nextIndex, pageCount)
 
-
 	// 新品推荐
 	var newGoods []models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
@@ -257,7 +255,7 @@ func (this *GoodsController) ShowList() {
 }
 
 // 显示搜索页
-func (this *GoodsController) HandleSearch(){
+func (this *GoodsController) HandleSearch() {
 	GetGoodsUser(this)
 	searchName := this.GetString("searchName")
 	if searchName == "" {
@@ -267,7 +265,7 @@ func (this *GoodsController) HandleSearch(){
 
 	o := orm.NewOrm()
 	var goods []models.GoodsSKU
-	o.QueryTable("GoodsSKU").Filter("Name__contains",searchName).All(&goods)
+	o.QueryTable("GoodsSKU").Filter("Name__contains", searchName).All(&goods)
 	this.Data["goods"] = goods
 
 	this.Layout = "layout_goods.html"

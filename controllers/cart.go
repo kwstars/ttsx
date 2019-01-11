@@ -46,18 +46,11 @@ func (this *CartController) HandleAddCart() {
 }
 
 func (this *CartController) ShowCart() {
-	currentLoginUser := this.GetSession("userName")
-	if currentLoginUser == nil {
-		this.Data["userName"] = ""
-	} else {
-		this.Data["userName"] = currentLoginUser.(string)
-	}
-
 	userName := this.GetSession("userName")
 	if userName == nil {
-		beego.Error("用户未登陆")
-		this.Redirect("/", 302)
-		return
+		this.Data["userName"] = ""
+	} else {
+		this.Data["userName"] = userName.(string)
 	}
 
 	conn, err := redis.Dial("tcp", ":6379")
@@ -76,7 +69,7 @@ func (this *CartController) ShowCart() {
 	}
 	o := orm.NewOrm()
 	var goods []map[string]interface{}
-	var totalPrice, totalGoodsCount,totalGoodsTypeCount int
+	var totalPrice, totalGoodsCount, totalGoodsTypeCount int
 	for goodsId, value := range cartMap {
 		temp := make(map[string]interface{})
 		id, _ := strconv.Atoi(goodsId)

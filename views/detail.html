@@ -1,3 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>天天生鲜-用户中心</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+</head>
+<body>
+<div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到天天生鲜!</div>
+        <div class="fr">
+        {{if compare .userName ""}}
+            <div class="login_btn fl">
+                <a href="/login">登录</a>
+                <span>|</span>
+                <a href="/register">注册</a>
+            </div>
+        {{else}}
+            <div class="login_btn fl">
+                欢迎您：<em>{{.userName}}</em>
+                <span>|</span>
+                <a href="/logout">退出登陆</a>
+            </div>
+        {{end}}
+            <div class="user_link fl">
+                <span>|</span>
+                <a href="/goods/userCenterInfo"> 购物车</a>
+                <span>|</span>
+                <a href="/cart">我的购物车</a>
+                <span>|</span>
+                <a href="/goods/userCenterOrder">我的订单</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="search_bar clearfix">
+    <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+    <div class="search_con fl">
+        <input type="text" class="input_text fl" name="" placeholder="搜索商品">
+        <input type="button" class="input_btn fr" name="" value="搜索">
+    </div>
+    <div class="guest_cart fr">
+        <a href="/cart" class="cart_name fl">我的购物车</a>
+        <div class="goods_count fl" id="show_count">1</div>
+    </div>
+</div>
+
 <div class="navbar_con">
     <div class="navbar clearfix">
         <div class="subnav_con fl">
@@ -20,9 +71,9 @@
 </div>
 
 <div class="breadcrumb">
-    <a href="/list">全部分类</a>
+    <a href="#">全部分类</a>
     <span>></span>
-    <a href="/list?typeId={{.goodsSku.GoodsType.Id}}">{{.goodsSku.GoodsType.Name}}</a>
+    <a href="#">新鲜水果</a>
     <span>></span>
     <a href="#">商品详情</a>
 </div>
@@ -102,7 +153,6 @@
         $(".num_show").val(count);
         CountTotalPrice()
     });
-
     $(".minus").click(function () {
         count = $(".num_show").val();
         count = parseInt(count) - 1;
@@ -112,7 +162,6 @@
         $(".num_show").val(count);
         CountTotalPrice();
     });
-
     $(".num_show").blur(function () {
         count = $(".num_show").val();
         if (isNaN(count) || count < 1 || count.trim().lenght == 0) {
@@ -121,20 +170,16 @@
         $(".num_show").val(parseInt(count));
         CountTotalPrice()
     });
-
     var $add_x = $('#add_cart').offset().top;
     var $add_y = $('#add_cart').offset().left;
-
     var $to_x = $('#show_count').offset().top;
     var $to_y = $('#show_count').offset().left;
-
     $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
+    // ajax 提交数据
     $('#add_cart').click(function () {
-
         goodsCount = $(".num_show").val();
         goodsId = $("#add_cart").attr("goodsId");
         params = {"goodsId": goodsId, "goodsCount": count}
-
         $.post("/cart", params, function (data) {
             if (data.errno == 5) {
                 alert(data.errmsg)
@@ -142,7 +187,6 @@
                 alert(data.errmsg)
             }
         });
-
         $(".add_jump").stop().animate({
                     'left': $to_y + 7,
                     'top': $to_x + 7
@@ -151,7 +195,23 @@
                     $(".add_jump").fadeOut('fast', function () {
                         $('#show_count').html(2);
                     });
-
                 });
     })
 </script>
+
+<div class="footer">
+    <div class="foot_link">
+        <a href="#">关于我们</a>
+        <span>|</span>
+        <a href="#">联系我们</a>
+        <span>|</span>
+        <a href="#">招聘人才</a>
+        <span>|</span>
+        <a href="#">友情链接</a>
+    </div>
+    <p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
+    <p>电话：010-****888 京ICP备*******8号</p>
+</div>
+
+</body>
+</html>

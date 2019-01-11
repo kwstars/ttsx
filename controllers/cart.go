@@ -47,26 +47,27 @@ func (this *CartController) HandleAddCart() {
 
 func (this *CartController) ShowCart() {
 	userName := this.GetSession("userName")
+	var cartMap map[string]int
 	if userName == nil {
 		this.Data["userName"] = ""
 	} else {
 		this.Data["userName"] = userName.(string)
+		conn, err := redis.Dial("tcp", ":6379")
+		if err != nil {
+			beego.Error("redis连接失败", err)
+			this.Redirect("/", 302)
+			return
+		}
+		defer conn.Close()
+
+		cartMap, err = redis.IntMap(conn.Do("hgetall", "cart_"+userName.(string)))
+		if err != nil {
+			beego.Error("获取数据失败", err)
+			this.Redirect("/", 302)
+			return
+		}
 	}
 
-	conn, err := redis.Dial("tcp", ":6379")
-	if err != nil {
-		beego.Error("redis连接失败", err)
-		this.Redirect("/", 302)
-		return
-	}
-	defer conn.Close()
-
-	cartMap, err := redis.IntMap(conn.Do("hgetall", "cart_"+userName.(string)))
-	if err != nil {
-		beego.Error("获取数据失败", err)
-		this.Redirect("/", 302)
-		return
-	}
 	o := orm.NewOrm()
 	var goods []map[string]interface{}
 	var totalPrice, totalGoodsCount, totalGoodsTypeCount int

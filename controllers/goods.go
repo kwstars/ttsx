@@ -59,6 +59,7 @@ func GetGoodsUser(this *GoodsController) (userName interface{}) {
 	return
 }
 
+// 显示主页
 func (this *GoodsController) ShowIndex() {
 	GetGoodsUser(this)
 	o := orm.NewOrm()
@@ -97,11 +98,12 @@ func (this *GoodsController) ShowIndex() {
 		goodsMap["goodsImage"] = goodsImage
 	}
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_goods.html"
 	this.Data["goods"] = goods
 	this.TplName = "index.html"
 }
 
+// 显示详情页
 func (this *GoodsController) ShowDetail() {
 	GetGoodsUser(this)
 	goodsId, err := this.GetInt("goodsId")
@@ -138,13 +140,14 @@ func (this *GoodsController) ShowDetail() {
 		conn.Do("ltrim", "history_"+userName.(string), 0, 4)
 	}
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_goods.html"
 	this.Data["goodsSku"] = goodsSku
 	this.Data["newGoods"] = newGoods
 	this.Data["goodsId"] = goodsId
 	this.TplName = "detail.html"
 }
 
+// 显示列表页
 func (this *GoodsController) ShowList() {
 	GetGoodsUser(this)
 
@@ -178,6 +181,7 @@ func (this *GoodsController) ShowList() {
 	sort := this.GetString("sort")
 	var qs orm.QuerySeter
 	var goodsCount int64
+	var navigationBarGoodsType models.GoodsSKU
 	if typeId == "" {
 		qs = o.QueryTable("GoodsSKU")
 		goodsCount, _ = qs.Count()
@@ -190,6 +194,10 @@ func (this *GoodsController) ShowList() {
 		}
 		qs = o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", id)
 		goodsCount, _ = qs.Count()
+
+		// 导航栏 类目显示
+		qs.One(&navigationBarGoodsType)
+		this.Data["navigationBarGoodsType"] = navigationBarGoodsType
 	}
 
 	if sort == "sales" {
@@ -220,15 +228,13 @@ func (this *GoodsController) ShowList() {
 	} else {
 		nextIndex = pageIndex + 1
 	}
+	beego.Info(preIndex, pageIndex, nextIndex, pageCount)
+
 
 	// 新品推荐
 	var newGoods []models.GoodsSKU
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
-
-	// 导航栏
-	goodsType := newGoods[0].GoodsType.Name
-	this.Data["goodsType"] = goodsType
 
 	// 新品推荐
 	this.Data["newGoods"] = newGoods
@@ -241,12 +247,29 @@ func (this *GoodsController) ShowList() {
 	this.Data["pageIndex"] = pageIndex
 	this.Data["preIndex"] = preIndex
 	this.Data["nextIndex"] = nextIndex
-	beego.Info(preIndex, pageIndex, nextIndex, pageCount)
 	this.Data["pages"] = pages
 
 	this.Data["goods"] = goods
 	this.Data["goodsTypes"] = goodsTypes
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_goods.html"
 	this.TplName = "list.html"
+}
+
+// 显示搜索页
+func (this *GoodsController) HandleSearch(){
+	GetGoodsUser(this)
+	searchName := this.GetString("searchName")
+	if searchName == "" {
+		this.Redirect("/", 302)
+		return
+	}
+
+	o := orm.NewOrm()
+	var goods []models.GoodsSKU
+	o.QueryTable("GoodsSKU").Filter("Name__contains",searchName).All(&goods)
+	this.Data["goods"] = goods
+
+	this.Layout = "layout_goods.html"
+	this.TplName = "search.html"
 }

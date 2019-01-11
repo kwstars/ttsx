@@ -219,13 +219,13 @@ func (this *UserController) ShowUserCenterInfo() {
 	this.Data["goods"] = goods
 	this.Data["receiver"] = receiver
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_user.html"
 	this.TplName = "user_center_info.html"
 }
 
 func (this *UserController) ShowUserCenterOrder() {
 	GetUser(this)
-	this.Layout = "layout.html"
+	this.Layout = "layout_user.html"
 	this.TplName = "user_center_order.html"
 }
 
@@ -241,7 +241,7 @@ func (this *UserController) ShowUserCenterSite() {
 
 	this.Data["receiver"] = receiver
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_user.html"
 	this.TplName = "user_center_site.html"
 }
 

@@ -16,6 +16,7 @@ func init() {
 	beego.Router("/", &controllers.GoodsController{}, "get:ShowIndex")
 	beego.Router("/detail",&controllers.GoodsController{},"get:ShowDetail")
 	beego.Router("/list",&controllers.GoodsController{},"get:ShowList")
+	beego.Router("/search",&controllers.GoodsController{},"post:HandleSearch")
 
 	// 注册 登陆 退出
 	beego.Router("/register", &controllers.UserController{}, "get:ShowRegister;post:HandleRegister")

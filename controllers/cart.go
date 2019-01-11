@@ -100,6 +100,6 @@ func (this *CartController) ShowCart() {
 	this.Data["totalGoodsTypeCount"] = totalGoodsTypeCount
 	this.Data["goods"] = goods
 
-	this.Layout = "layout.html"
+	this.Layout = "layout_user.html"
 	this.TplName = "cart.html"
 }

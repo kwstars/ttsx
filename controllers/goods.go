@@ -6,6 +6,7 @@ import (
 	"ttsx/models"
 	"github.com/gomodule/redigo/redis"
 	"math"
+	"strconv"
 )
 
 type GoodsController struct {
@@ -21,7 +22,7 @@ func showGoodsTypes(this *GoodsController) (goodsTypes []models.GoodsType) {
 }
 
 // 详情页分页
-func pageEditor(pageCount, pageIndex int) []int {
+func pageCal(pageCount, pageIndex int) []int {
 	var pages []int
 	if pageCount < 5 {
 		pages = make([]int, pageCount)
@@ -146,45 +147,67 @@ func (this *GoodsController) ShowDetail() {
 
 func (this *GoodsController) ShowList() {
 	GetGoodsUser(this)
-	typeId, err := this.GetInt("typeId")
-	if err != nil {
-		beego.Error("获取类型ID错误",err)
-		this.Redirect("/", 302)
-		return
-	}
 
-	showGoodsTypes(this)
-
-	// 获取当前类型的商品
+	typeId := this.GetString("typeId")
 	o := orm.NewOrm()
-	var goodsSkus []models.GoodsSKU
-	qs := o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId)
-	count, err := qs.Count()
-	if err != nil {
-		beego.Error("请求连接错误")
-		this.Redirect("/", 302)
-		return
-	}
 
-	pageSize := 2
-	pageCount := math.Ceil(float64(count) / float64(pageSize))
-	pageIndex, err := this.GetInt("pageIndex")
-	if err != nil {
+	// 获取全部商品类型
+	var goodsTypes []models.GoodsType
+	o.QueryTable("GoodsType").All(&goodsTypes)
+
+	// 设置页面的大小
+	var pageSize = 2
+
+	// 获取当前所在的页面 index
+	pageIndexS := this.GetString("pageIndex")
+	var pageIndex int
+	var err error
+	if pageIndexS == "" {
 		pageIndex = 1
-	}
-	pages := pageEditor(int(pageCount), pageIndex)
-
-	start := (pageIndex - 1) * pageSize
-
-	sort := this.GetString("sort")
-	if sort == "" {
-		qs.Limit(pageSize, start).All(&goodsSkus)
-	} else if sort == "price" {
-		qs.OrderBy("Price").Limit(pageSize, start).All(&goodsSkus)
 	} else {
-		qs.OrderBy("Sales").Limit(pageSize, start).All(&goodsSkus)
+		pageIndex, err = strconv.Atoi(pageIndexS)
+		if err != nil {
+			beego.Error("atoi失败", err)
+			pageIndex = 1
+		}
 	}
 
+	// 获取页面的开始位置
+	var start = (pageIndex - 1) * pageSize
+	var goods []models.GoodsSKU
+	sort := this.GetString("sort")
+	var qs orm.QuerySeter
+	var goodsCount int64
+	if typeId == "" {
+		qs = o.QueryTable("GoodsSKU")
+		goodsCount, _ = qs.Count()
+	} else {
+		id, err := strconv.Atoi(typeId)
+		if err != nil {
+			beego.Error("atoi错误", err)
+			this.Redirect("/", 302)
+			return
+		}
+		qs = o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", id)
+		goodsCount, _ = qs.Count()
+	}
+
+	if sort == "sales" {
+		qs.OrderBy("Sales").Limit(pageSize, start).All(&goods)
+	} else if sort == "price" {
+		qs.OrderBy("Price").Limit(pageSize, start).All(&goods)
+	} else {
+		qs.Limit(pageSize, start).All(&goods)
+	}
+
+	// 获取页面的数量
+	pageCount := math.Ceil(float64(goodsCount) / float64(pageSize))
+
+	// 对页面进行分页
+	var pages []int
+	pages = pageCal(int(pageCount), pageIndex)
+
+	// 下一页, 上一页
 	var preIndex, nextIndex int
 	if pageIndex == 1 {
 		preIndex = 1
@@ -203,18 +226,27 @@ func (this *GoodsController) ShowList() {
 	o.QueryTable("GoodsSKU").RelatedSel("GoodsType").Filter("GoodsType__Id", typeId).
 		OrderBy("Time").Limit(2, 0).All(&newGoods)
 
+	// 导航栏
 	goodsType := newGoods[0].GoodsType.Name
+	this.Data["goodsType"] = goodsType
 
+	// 新品推荐
 	this.Data["newGoods"] = newGoods
+
+	// 排序
 	this.Data["sort"] = sort
+
+	// 分页
 	this.Data["typeId"] = typeId
+	this.Data["pageIndex"] = pageIndex
 	this.Data["preIndex"] = preIndex
 	this.Data["nextIndex"] = nextIndex
-	this.Data["pageIndex"] = pageIndex
-
+	beego.Info(preIndex, pageIndex, nextIndex, pageCount)
 	this.Data["pages"] = pages
-	this.Data["goodsSkus"] = goodsSkus
-	this.Data["goodsType"] = goodsType
+
+	this.Data["goods"] = goods
+	this.Data["goodsTypes"] = goodsTypes
+
 	this.Layout = "layout.html"
 	this.TplName = "list.html"
 }

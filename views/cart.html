@@ -32,3 +32,22 @@
     <li class="col03">合计(不含运费)：<span>¥</span><em>{{.totalPrice}}</em><br>共计<b>{{.totalGoodsCount}}</b>件商品</li>
     <li class="col04"><a href="place_order.html">去结算</a></li>
 </ul>
+
+<script src="/static/js/jquery-1.12.4.min.js"></script>
+<script>
+    CountTotalPrice()
+
+    function CountTotalPrice() {
+        $(".cart_list_td").find(":checked").each(function () {
+            var totalPrice = 0;
+            var totalCount = 0;
+            price = $(this).parents(".cart_list_td").children(".col07").text();
+            totalPrice += parseInt(price);
+            totalCount += 1
+        });
+
+        $(".settlements").find("em").text(totalPrice.toFixed(2))
+        $(".settlements").find("b").text(totalCount)
+
+    }
+</script>

@@ -38,14 +38,15 @@
     CountTotalPrice();
 
     function CountTotalPrice() {
+        var totalPrice = 0;
+        var totalCount = 0;
         $(".cart_list_td").find(":checked").each(function () {
-            var totalPrice = 0;
-            var totalCount = 0;
             price = $(this).parents(".cart_list_td").children(".col07").text();
             // alert(price)
             totalPrice += parseInt(price);
             totalCount += 1
         });
+
         $(".settlements").find("em").text(totalPrice.toFixed(2));
         $(".settlements").find("b").text(totalCount)
     }

@@ -27,7 +27,7 @@
 {{end}}
 
 <ul class="settlements">
-    <li class="col01"><input type="checkbox" name="" checked=""></li>
+    <li class="col01"><input type="checkbox" name="" checked="" id="select"></li>
     <li class="col02">全选</li>
     <li class="col03">合计(不含运费)：<span>¥</span><em>{{.totalPrice}}</em><br>共计<b>{{.totalGoodsCount}}</b>件商品</li>
     <li class="col04"><a href="place_order.html">去结算</a></li>
@@ -35,19 +35,26 @@
 
 <script src="/static/js/jquery-1.12.4.min.js"></script>
 <script>
-    CountTotalPrice()
+    CountTotalPrice();
 
     function CountTotalPrice() {
         $(".cart_list_td").find(":checked").each(function () {
             var totalPrice = 0;
             var totalCount = 0;
             price = $(this).parents(".cart_list_td").children(".col07").text();
+            // alert(price)
             totalPrice += parseInt(price);
             totalCount += 1
         });
-
-        $(".settlements").find("em").text(totalPrice.toFixed(2))
+        $(".settlements").find("em").text(totalPrice.toFixed(2));
         $(".settlements").find("b").text(totalCount)
-
     }
+
+    $("#select").change(function () {
+        IsChecked = $(this).prop("checked");
+        $(".cart_list_td").find(":checkbox").prop("checked", IsChecked);
+
+        CountTotalPrice()
+    })
+
 </script>

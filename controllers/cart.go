@@ -145,3 +145,39 @@ func (this *CartController) UpdateCart() {
 		this.Data["json"] = resp
 	}
 }
+
+func RespFun(this *CartController, resp map[string]interface{}) {
+	this.Data["json"] = resp
+	this.ServeJSON()
+}
+func (this *CartController) DeleteCart() {
+	goodsId, err := this.GetInt("goodsId")
+
+	resp := make(map[string]interface{})
+	defer RespFun(this, resp)
+
+	if err != nil {
+		resp["errno"] = 1
+		resp["errmsg"] = "数据传输错我"
+		return
+	}
+
+	userName := this.GetSession("userName")
+	if userName == nil {
+		resp["errno"] = 2
+		resp["errmsg"] = "user is not loging"
+		return
+	}
+
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		resp["errno"] = 3
+		resp["errmsg"] = "redis connect failed!"
+		return
+	}
+	defer conn.Close()
+
+	conn.Do("hdel", "cart_"+userName.(string), goodsId)
+	resp["errno"] = 5
+	resp["remsg"] = "ok"
+}

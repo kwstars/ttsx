@@ -200,8 +200,13 @@
         $.ajaxSettings.async = true
 
         if (errUpdate == true) {
-            $(this).parents(".cart_list_td").remove()
-            CountTotalPrice()
+            msg = "您真的确定要删除吗？请确认！"
+            if(confirm(msg) == true){
+                $(this).parents(".cart_list_td").remove()
+                CountTotalPrice()
+            } else{
+                return false
+            }
         }
     })
 </script>

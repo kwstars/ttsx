@@ -79,9 +79,9 @@
         <li class="col04">数量</li>
         <li class="col05">小计</li>
     </ul>
-{{range .goods}}
+{{range $key, $value := .goods}}
     <ul class="goods_list_td clearfix">
-        <li class="col01">{{.goodsSku.Id}}</li>
+        <li class="col01">{{$key | add}}</li>
         <li class="col02"><img src="http://192.168.111.132:8888/{{.goodsSku.Image}}"></li>
         <li class="col03">{{.goodsSku.Name}}</li>
         <li class="col04">{{.goodsSku.Unite}}</li>

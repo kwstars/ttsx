@@ -7,5 +7,11 @@ import (
 )
 
 func main() {
+	beego.AddFuncMap("add", OrderAddOne)
 	beego.Run()
+}
+
+func OrderAddOne(in int) (out int)  {
+	out = in + 1
+	return
 }

@@ -50,6 +50,7 @@ func (this *CartController) ShowCart() {
 	var cartMap map[string]int
 	if userName == nil {
 		this.Data["userName"] = ""
+		this.Redirect("/login", 302)
 	} else {
 		this.Data["userName"] = userName.(string)
 		conn, err := redis.Dial("tcp", ":6379")
@@ -96,4 +97,51 @@ func (this *CartController) ShowCart() {
 
 	this.Layout = "layout_user.html"
 	this.TplName = "cart.html"
+}
+
+func (this *CartController) UpdateCart() {
+	resp := make(map[string]interface{})
+	userName := this.GetSession("userName")
+	if userName == "" {
+		resp["errno"] = 9
+		resp["errmsg"] = "请先登陆"
+		this.Data["json"] = resp
+		this.ServeJSON()
+		this.Redirect("/login", 302)
+	}
+	goodsId, err1 := this.GetInt("goodsId")
+	count, err2 := this.GetInt("count")
+	defer this.ServeJSON()
+
+	if err1 != nil || err2 != nil {
+		beego.Info("err1", err1, "err2", err2)
+		resp["errno"] = 1
+		resp["errmsg"] = "传输数据格式错误"
+		this.Data["json"] = resp
+		return
+	}
+
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		beego.Error(err)
+		resp["errno"] = 2
+		resp["errmsg"] = "redis connent err"
+		this.Data["json"] = resp
+		this.ServeJSON()
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Do("hset", "cart_"+userName.(string), goodsId, count)
+	if err != nil {
+		beego.Error(err)
+		resp["errno"] = 3
+		resp["errmsg"] = "redis写入数据失败"
+		this.Data["json"] = resp
+		return
+	} else {
+		resp["errno"] = 5
+		resp["errmsg"] = "redis写入成功"
+		this.Data["json"] = resp
+	}
 }

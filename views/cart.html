@@ -17,7 +17,7 @@
     <li class="col06">
         <div class="num_add">
             <a href="javascript:;" class="add fl">+</a>
-            <input type="text" class="num_show fl" value="{{.count}}">
+            <input type="text" class="num_show fl" goodsId="{{.goodsSku.Id}}" value="{{.count}}">
             <a href="javascript:;" class="minus fl">-</a>
         </div>
     </li>
@@ -57,20 +57,59 @@
         $(".cart_list_td").find(":checkbox").prop("checked", IsChecked);
 
         CountTotalPrice()
-    })
+    });
 
     // 商品的checkbox选中状态对全选按钮以及总价的影响
     $(".goodsCheck").change(function () {
+        // CSS 选择器
         checkedLength = $(".cart_list_td").find(":checked").length;
+        // jQuery选择器
         checkboxLength = $(".cart_list_td").find(":checkbox").length;
 
         if (checkedLength == checkboxLength) {
-            $("#select").prop("checked","checked")
+            $("#select").prop("checked", "checked")
         } else {
-            $("#select").prop("checked","")
+            $("#select").prop("checked", "")
         }
 
         CountTotalPrice()
-    })
+    });
+
+    // 添加按钮
+    $(".add").click(function () {
+        // 从页面获取值
+        count = parseInt($(this).next().val());
+        count += 1;
+        goodsId = $(this).next().attr("goodsId");
+        params = {"goodsId": goodsId, "count": count};
+
+        // ajax 传输到后台
+        var errUpdate = false;
+        $.ajaxSettings.async = false;
+        $.post("/updateCart", params, function (data) {
+            if (data.errno == 5) {
+                // alert(data.errmsg);
+                errUpdate = true
+            } else {
+                alert(data.errmsg);
+                errUpdate = false
+            }
+        });
+        $.ajaxSettings.async = true;
+
+        // 更新数据
+        if (errUpdate == true) {
+            // 更新到页面上
+            $(this).next().val(count);
+
+            // 计算小结
+            price = $(this).parents(".cart_list_td").children(".col05").text();
+            // alert(price);
+            totalPrice = parseInt(price) * count;
+            $(this).parents(".cart_list_td").children(".col07").text(totalPrice);
+
+            CountTotalPrice();
+        }
+    });
 
 </script>

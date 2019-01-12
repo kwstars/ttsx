@@ -7,30 +7,33 @@
     <li class="col05">小计</li>
     <li class="col06">操作</li>
 </ul>
+<form action="/goods/order" method="post" id="from">
 {{range .goods}}
-<ul class="cart_list_td clearfix">
-    <li class="col01"><input type="checkbox" name="" checked class="goodsCheck"></li>
-    <li class="col02"><img src="http://192.168.111.132:8888/{{.goodsSku.Image}}"></li>
-    <li class="col03">{{.goodsSku.Name}}<br><em>{{.goodsSku.Price}}元/{{.goodsSku.Unite}}</em></li>
-    <li class="col04">{{.goodsSku.Unite}}</li>
-    <li class="col05">{{.goodsSku.Price}}元</li>
-    <li class="col06">
-        <div class="num_add">
-            <a href="javascript:;" class="add fl">+</a>
-            <input type="text" class="num_show fl" goodsId="{{.goodsSku.Id}}" value="{{.count}}">
-            <a href="javascript:;" class="minus fl">-</a>
-        </div>
-    </li>
-    <li class="col07">{{.price}}元</li>
-    <li class="col08"><a href="javascript:;" class="delete">删除</a></li>
-</ul>
+    <ul class="cart_list_td clearfix">
+        <li class="col01"><input type="checkbox" name="goodsId" checked class="goodsCheck" value="{{.goodsSku.Id}}">
+        </li>
+        <li class="col02"><img src="http://192.168.111.132:8888/{{.goodsSku.Image}}"></li>
+        <li class="col03">{{.goodsSku.Name}}<br><em>{{.goodsSku.Price}}元/{{.goodsSku.Unite}}</em></li>
+        <li class="col04">{{.goodsSku.Unite}}</li>
+        <li class="col05">{{.goodsSku.Price}}元</li>
+        <li class="col06">
+            <div class="num_add">
+                <a href="javascript:;" class="add fl">+</a>
+                <input type="text" class="num_show fl" goodsId="{{.goodsSku.Id}}" value="{{.count}}">
+                <a href="javascript:;" class="minus fl">-</a>
+            </div>
+        </li>
+        <li class="col07">{{.price}}元</li>
+        <li class="col08"><a href="javascript:;" class="delete">删除</a></li>
+    </ul>
 {{end}}
+</form>
 
 <ul class="settlements">
     <li class="col01"><input type="checkbox" name="" checked="" id="select"></li>
     <li class="col02">全选</li>
     <li class="col03">合计(不含运费)：<span>¥</span><em>{{.totalPrice}}</em><br>共计<b>{{.totalGoodsCount}}</b>件商品</li>
-    <li class="col04"><a href="place_order.html">去结算</a></li>
+    <li class="col04"><a id="qujiesuan">去结算</a></li>
 </ul>
 
 <script src="/static/js/jquery-1.12.4.min.js"></script>
@@ -201,12 +204,16 @@
 
         if (errUpdate == true) {
             msg = "您真的确定要删除吗？请确认！"
-            if(confirm(msg) == true){
+            if (confirm(msg) == true) {
                 $(this).parents(".cart_list_td").remove()
                 CountTotalPrice()
-            } else{
+            } else {
                 return false
             }
         }
+    })
+
+    $("#qujiesuan").click(function () {
+        $("#from").submit()
     })
 </script>

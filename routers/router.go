@@ -33,6 +33,9 @@ func init() {
 	beego.Router("/cart", &controllers.CartController{},"get:ShowCart;post:HandleAddCart")
 	beego.Router("/updateCart", &controllers.CartController{},"post:UpdateCart")
 	beego.Router("/deleteCart", &controllers.CartController{},"post:DeleteCart")
+
+	// 订单
+	beego.Router("/goods/order", &controllers.OrderController{},"post:ShowOrder")
 }
 
 func filterFunc(ctx *context.Context) {

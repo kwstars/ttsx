@@ -46,7 +46,10 @@
 <div class="common_list_con clearfix">
     <dl>
         <dt>寄送到：</dt>
-        <dd><input type="radio" name="" checked="">北京市 海淀区 东北旺西路8号中关村软件园 （李思 收） 182****7528</dd>
+    {{range .receiver}}
+        <dd><input type="radio" name="addr" {{if compare .IsDefault true}} checked="checked"{{end}}>{{.Addr}} （{{.Name}}
+            收） {{.Phone}}</dd>
+    {{end}}
     </dl>
     <a href="user_center_site.html" class="edit_site">编辑收货地址</a>
 
@@ -76,24 +79,17 @@
         <li class="col04">数量</li>
         <li class="col05">小计</li>
     </ul>
+{{range .goods}}
     <ul class="goods_list_td clearfix">
-        <li class="col01">1</li>
-        <li class="col02"><img src="images/goods/goods012.jpg"></li>
-        <li class="col03">奇异果</li>
-        <li class="col04">500g</li>
-        <li class="col05">25.80元</li>
-        <li class="col06">1</li>
-        <li class="col07">25.80元</li>
+        <li class="col01">{{.goodsSku.Id}}</li>
+        <li class="col02"><img src="http://192.168.111.132:8888/{{.goodsSku.Image}}"></li>
+        <li class="col03">{{.goodsSku.Name}}</li>
+        <li class="col04">{{.goodsSku.Unite}}</li>
+        <li class="col05">{{.goodsSku.Price}}元</li>
+        <li class="col06">{{.count}}</li>
+        <li class="col07">{{.price}}元</li>
     </ul>
-    <ul class="goods_list_td clearfix">
-        <li class="col01">2</li>
-        <li class="col02"><img src="images/goods/goods003.jpg"></li>
-        <li class="col03">大兴大棚草莓</li>
-        <li class="col04">500g</li>
-        <li class="col05">16.80元</li>
-        <li class="col06">1</li>
-        <li class="col07">16.80元</li>
-    </ul>
+{{end}}
 </div>
 
 <h3 class="common_title">总金额结算</h3>

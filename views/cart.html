@@ -22,7 +22,7 @@
         </div>
     </li>
     <li class="col07">{{.price}}元</li>
-    <li class="col08"><a href="javascript:;">删除</a></li>
+    <li class="col08"><a href="javascript:;" class="delete">删除</a></li>
 </ul>
 {{end}}
 
@@ -179,6 +179,28 @@
             totalPrice = parseInt(count) * parseInt(price);
 
             $(this).parents(".cart_list_td").children(".col07").text(totalPrice + "元");
+            CountTotalPrice()
+        }
+    })
+
+    $(".delete").click(function () {
+        goodsId = $(this).parents(".cart_list_td").find(".num_show").attr("goodsId");
+        // alert(goodsId)
+        params = {"goodsId": goodsId}
+        errUpdate = false
+        $.ajaxSettings.async = false
+        $.post("/deleteCart", params, function (data) {
+            if (data.errno == 5) {
+                errUpdate = true
+            } else {
+                errUpdate = false
+                alert(data.errmsg)
+            }
+        })
+        $.ajaxSettings.async = true
+
+        if (errUpdate == true) {
+            $(this).parents(".cart_list_td").remove()
             CountTotalPrice()
         }
     })

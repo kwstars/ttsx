@@ -9,7 +9,7 @@
 </ul>
 {{range .goods}}
 <ul class="cart_list_td clearfix">
-    <li class="col01"><input type="checkbox" name="" checked></li>
+    <li class="col01"><input type="checkbox" name="" checked class="goodsCheck"></li>
     <li class="col02"><img src="http://192.168.111.132:8888/{{.goodsSku.Image}}"></li>
     <li class="col03">{{.goodsSku.Name}}<br><em>{{.goodsSku.Price}}元/{{.goodsSku.Unite}}</em></li>
     <li class="col04">{{.goodsSku.Unite}}</li>
@@ -40,6 +40,7 @@
     function CountTotalPrice() {
         var totalPrice = 0;
         var totalCount = 0;
+
         $(".cart_list_td").find(":checked").each(function () {
             price = $(this).parents(".cart_list_td").children(".col07").text();
             // alert(price)
@@ -54,6 +55,20 @@
     $("#select").change(function () {
         IsChecked = $(this).prop("checked");
         $(".cart_list_td").find(":checkbox").prop("checked", IsChecked);
+
+        CountTotalPrice()
+    })
+
+    // 商品的checkbox选中状态对全选按钮以及总价的影响
+    $(".goodsCheck").change(function () {
+        checkedLength = $(".cart_list_td").find(":checked").length;
+        checkboxLength = $(".cart_list_td").find(":checkbox").length;
+
+        if (checkedLength == checkboxLength) {
+            $("#select").prop("checked","checked")
+        } else {
+            $("#select").prop("checked","")
+        }
 
         CountTotalPrice()
     })

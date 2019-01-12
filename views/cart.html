@@ -106,10 +106,80 @@
             price = $(this).parents(".cart_list_td").children(".col05").text();
             // alert(price);
             totalPrice = parseInt(price) * count;
-            $(this).parents(".cart_list_td").children(".col07").text(totalPrice);
+            $(this).parents(".cart_list_td").children(".col07").text(totalPrice + "元");
 
             CountTotalPrice();
         }
     });
 
+    $(".minus").click(function () {
+        count = parseInt($(this).prev().val());
+        count -= 1;
+        if (count < 1) {
+            count = 1
+        }
+
+        goodsId = $(this).prev().attr("goodsId");
+        params = {"goodsId": goodsId, "count": count};
+
+        var errUpdate = false;
+        $.ajaxSettings.async = false;
+        $.post("/updateCart", params, function (data) {
+            if (data.errno == 5) {
+                errUpdate = true
+            } else {
+                errUpdate = false
+            }
+        });
+        $.ajaxSettings.async = true;
+
+        if (errUpdate == true) {
+            $(this).prev().val(count);
+
+            price = $(this).parents(".cart_list_td").children(".col05").text();
+            totalPrice = parseInt(price) * count;
+
+            $(this).parents(".cart_list_td").children(".col07").text(totalPrice + "元");
+            CountTotalPrice();
+        }
+    });
+
+    var preCount
+    $(".num_show").focus(function () {
+        preCount = parseInt($(this).val())
+    });
+
+    $(".num_show").blur(function () {
+        count = $(this).val();
+
+        if (isNaN(count) || count < 1 || count.trim().length == 0) {
+            count = preCount;
+            $(this).val(count);
+            return
+        }
+
+        goodsId = $(this).attr("goodsId");
+        count = parseInt(count);
+        params = {"goodsId": goodsId, "count": count};
+        var errUpdate = false;
+        $.ajaxSettings.async = false;
+        $.post("updateCart", params, function (data) {
+            if (data.errno == 5) {
+                errUpdate = true
+            } else {
+                alert(data.errmsg);
+                errUpdate = false
+            }
+        });
+        $.ajaxSettings.async = true;
+
+        if (errUpdate = true) {
+            $(this).val(count);
+            price = $(this).parents(".cart_list_td").children(".col05").text();
+            totalPrice = parseInt(count) * parseInt(price);
+
+            $(this).parents(".cart_list_td").children(".col07").text(totalPrice + "元");
+            CountTotalPrice()
+        }
+    })
 </script>

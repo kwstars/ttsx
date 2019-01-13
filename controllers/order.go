@@ -258,11 +258,11 @@ func (this *OrderController) SendMsg() {
 		gatewayUrl      = "http://dysmsapi.aliyuncs.com/"
 		accessKeyId     = "LTAIN9gZtWEmkc1e"
 		accessKeySecret = "H7wFlnWODmifC7DHgps21wfO5GRn1e"
-		phoneNumbers    = "1234567890"  //要发送的电话号码
-		signName        = "天天生鲜"     //签名名称
-		templateCode    = "SMS_149101793"  //模板号
-		code = "iloveyou"
-		templateParam   = "{\"code\":\""+code+"\"}"//验证码
+		phoneNumbers    = "1234567890"    //要发送的电话号码
+		signName        = "天天生鲜"          //签名名称
+		templateCode    = "SMS_149101793" //模板号
+		code            = "iloveyou"
+		templateParam   = "{\"code\":\"" + code + "\"}" //验证码
 	)
 
 	smsClient := aliyunsmsclient.New(gatewayUrl)

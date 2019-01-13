@@ -1,5 +1,3 @@
-
-
 <div class="main_con clearfix">
     <div class="left_menu_con clearfix">
         <h3>用户中心</h3>
@@ -33,7 +31,8 @@
                 </td>
                 <td width="15%">{{.orderInfo.TotalPrice}}元</td>
                 <td width="15%">{{if compare .orderInfo.Orderstatus 0}}代付款{{else}}已付款{{end}}</td>
-                <td width="15%">{{if compare .orderInfo.Orderstatus 0}}<a href="/aliPay" class="oper_btn">去付款</a>{{else}}<a href="#" class="oper_btn">查看物流</a>{{end}}</td>
+                <td width="15%">{{if compare .orderInfo.Orderstatus 0}}
+                    <a href="/aliPay" class="oper_btn">去付款</a>{{else}}<a href="#" class="oper_btn">查看物流</a>{{end}}</td>
             </tr>
             </tbody>
         </table>
@@ -41,7 +40,9 @@
     {{end}}
 
         <div class="pagenation">
-            <a href="#"><上一页</a>
+            <a href="#">
+                <上一页
+            </a>
             <a href="#" class="active">1</a>
             <a href="#">2</a>
             <a href="#">3</a>

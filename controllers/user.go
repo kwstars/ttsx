@@ -224,7 +224,25 @@ func (this *UserController) ShowUserCenterInfo() {
 }
 
 func (this *UserController) ShowUserCenterOrder() {
-	GetUser(this)
+	userName := GetUser(this)
+
+	var goods []map[string]interface{}
+
+	o := orm.NewOrm()
+	var orderInfos []models.OrderInfo
+	o.QueryTable("OrderInfo").RelatedSel("User").Filter("User__UserName", userName).All(&orderInfos)
+
+	for _, v := range orderInfos {
+		temp := make(map[string]interface{})
+		var orderGoods []models.OrderGoods
+		o.QueryTable("OrderGoods").RelatedSel("OrderInfo", "GoodsSKU").Filter("OrderInfo__Id", v.Id).All(&orderGoods)
+		temp["orderInfo"] = v
+		temp["orderGoods"] = orderGoods
+
+		goods = append(goods, temp)
+	}
+
+	this.Data["goods"] = goods
 	this.Layout = "layout_user.html"
 	this.TplName = "user_center_order.html"
 }

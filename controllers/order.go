@@ -171,3 +171,7 @@ func (this *OrderController) AddOrder() {
 	resp["errno"] = 5
 	resp["errmsg"] = "ok"
 }
+
+func (this *OrderController) HandlePay(){
+
+}

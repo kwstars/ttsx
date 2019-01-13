@@ -112,7 +112,7 @@ func (this *OrderController) AddOrder() {
 	o.Read(&user, "UserName")
 
 	// 3.支付编号 用户 地址  付款方式 商品数量 商品总价 运费
-	orderInfo.OrderId = time.Now().Format("20061002150405") + strconv.Itoa(user.Id)
+	orderInfo.OrderId = time.Now().Format("20060102150405") + strconv.Itoa(user.Id)
 	orderInfo.User = &user
 	orderInfo.Receiver = &receiver
 	orderInfo.PayMethod = payId
@@ -123,7 +123,6 @@ func (this *OrderController) AddOrder() {
 	// 4.插入用户信息表
 	o.Insert(&orderInfo)
 
-	var orderGoods models.OrderGoods
 	beego.Info(goodsIds)
 	// 1.处理goodsIds的字符串 [1 7 23]
 	ids := strings.Split(goodsIds[1:len(goodsIds)-1], " ")
@@ -138,12 +137,14 @@ func (this *OrderController) AddOrder() {
 	}
 
 	for _, v := range ids {
+		beego.Info(v)
 		// 3.循环获取商品
 		id, err := strconv.Atoi(v)
 		if err != nil {
 			beego.Error(err)
 			return
 		}
+
 		var goodsSku models.GoodsSKU
 		goodsSku.Id = id
 		o.Read(&goodsSku)
@@ -157,6 +158,7 @@ func (this *OrderController) AddOrder() {
 		}
 
 		// 4.订单 商品 商品数量 商品价格
+		var orderGoods models.OrderGoods
 		orderGoods.OrderInfo = &orderInfo
 		orderGoods.GoodsSKU = &goodsSku
 		orderGoods.Count = count

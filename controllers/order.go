@@ -30,6 +30,8 @@ func (this *OrderController) ShowOrder() {
 
 
 	var goods []map[string]interface{}
+	totalPrice := 0
+	totalCount := 0
 	conn,_ := redis.Dial("tcp",":6379")
 	for _, value := range goodsIds {
 		id, _ := strconv.Atoi(value)
@@ -42,9 +44,19 @@ func (this *OrderController) ShowOrder() {
 		count, _ := redis.Int(conn.Do("hget","cart_"+userName,id))
 		price := goodsSku.Price * count
 		temp["price"] = price
-
+		temp["count"] = count
+		totalPrice += price
+		totalCount += count
 		goods = append(goods,temp)
 	}
+
+	transferPrice := 10
+	payPrice := totalPrice + transferPrice
+
+	this.Data["totalPrice"] = totalPrice
+	this.Data["totalCount"] = totalCount
+	this.Data["transferPrice"] = transferPrice
+	this.Data["payPrice"] = payPrice
 
 	this.Data["goods"] = goods
 	this.TplName = "place_order.html"

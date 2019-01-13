@@ -146,7 +146,7 @@ func (this *CartController) UpdateCart() {
 	}
 }
 
-func RespFun(this *CartController, resp map[string]interface{}) {
+func RespFun(this *beego.Controller, resp map[string]interface{}) {
 	this.Data["json"] = resp
 	this.ServeJSON()
 }
@@ -154,7 +154,7 @@ func (this *CartController) DeleteCart() {
 	goodsId, err := this.GetInt("goodsId")
 
 	resp := make(map[string]interface{})
-	defer RespFun(this, resp)
+	defer RespFun(&this.Controller, resp)
 
 	if err != nil {
 		resp["errno"] = 1

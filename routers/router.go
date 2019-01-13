@@ -36,6 +36,7 @@ func init() {
 
 	// 订单
 	beego.Router("/goods/order", &controllers.OrderController{},"post:ShowOrder")
+	beego.Router("/goods/addOrder", &controllers.OrderController{},"post:AddOrder")
 }
 
 func filterFunc(ctx *context.Context) {

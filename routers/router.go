@@ -37,6 +37,12 @@ func init() {
 	// 订单
 	beego.Router("/goods/order", &controllers.OrderController{},"post:ShowOrder")
 	beego.Router("/goods/addOrder", &controllers.OrderController{},"post:AddOrder")
+
+	// 支付宝
+	beego.Router("/aliPay",&controllers.OrderController{},"get:HandlePay")
+	beego.Router("/payOk",&controllers.OrderController{},"get:PayOK")
+
+
 }
 
 func filterFunc(ctx *context.Context) {

@@ -33,7 +33,7 @@
                 </td>
                 <td width="15%">{{.orderInfo.TotalPrice}}元</td>
                 <td width="15%">{{if compare .orderInfo.Orderstatus 0}}代付款{{else}}已付款{{end}}</td>
-                <td width="15%">{{if compare .orderInfo.Orderstatus 0}}<a href="#" class="oper_btn">去付款</a>{{else}}<a href="#" class="oper_btn">查看物流</a>{{end}}</td>
+                <td width="15%">{{if compare .orderInfo.Orderstatus 0}}<a href="/aliPay" class="oper_btn">去付款</a>{{else}}<a href="#" class="oper_btn">查看物流</a>{{end}}</td>
             </tr>
             </tbody>
         </table>

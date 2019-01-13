@@ -8,6 +8,8 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"time"
 	"strings"
+	"github.com/smartwalle/alipay"
+	"fmt"
 )
 
 type OrderController struct {
@@ -172,6 +174,80 @@ func (this *OrderController) AddOrder() {
 	resp["errmsg"] = "ok"
 }
 
-func (this *OrderController) HandlePay(){
+func (this *OrderController) HandlePay() {
+	var privateKey = `MIIEpQIBAAKCAQEAukKW0jfG3C0ZL0pDdTtaWi2yhf6yP41QN3kL8HktxdnKsLws
+					4PvRh1ddqD4mQEFQDxPjYj4kRbPQkhLjcQJzohNoLOUhpstXH+h0q7jhWbgwWpQL
+					nwV1ktYvZ+wrA7pHmkkrvq1wpKWJRHxlG50xZZ2g2M7octL6IKpYRAx/IY3Dxn2M
+					vk0PArBw3/7aDEmuSIAhBqmE/+Me6kFIcOTl8B1yF1ey+roPJyVABQmRCKAbP/rh
+					h6RRUesK6lax8+G+1RjqULHZL1A+1qgG2CN0VqHxEqQ86K0AnBUZLi75Ex++BWQw
+					1v9AfB7py3DmbBOFUmtm3ZLXXzzR+YupkhKdWQIDAQABAoIBADzc23mvvixeFDeu
+					taJOFbUX75j3Y/l+TLMDu9IFVt6qzx+3LZcK0im+c50xScB/VxDGN+v3UFTyb/n7
+					cBSSb4SLgOQCr19YXIzRoaYnUIPHuw0uCSoaV5P2pyD3PAsIyLLyq/evpvo2GUem
+					ukcus2B4BII0AiLbK96Wqyb5SmWE5TU70EaLXBfP5728gE0s4oVKk7kMl1ZBqIDE
+					KAyfoLbo1WMgZrt1bjHa0NTalvYh8ZXdZDCU6KODLDz/bp3c5JfPKjw4NuLWObFP
+					4tpOQvNvGn+ciETAW+7YchefZcaPsImFokRxaGxSnAqvbakVqrFwV4twzuXM2qED
+					9hRWKu0CgYEA7ck/zNf/Gc0jO2qEkD+CezAgHge0jwQapgZseYmELWc1rJc1bOL1
+					uYhcAAHmH3bvT1O6TL6MpGsa+YulfEpDz9VpZteIJZJ1KFVKdgh2KQv/Gj6lTYKU
+					exXWWQOkgRmzB0c00SqpTaqCo8ZAjw57cjgxjVZihUyez6IUTQazflcCgYEAyIb3
+					ObiSbJH4RryvqdsoJu+GuCeoRRMYCuHKiq8BZ9lmDXEM128jdV4Hp6jRs+gPpRX5
+					C9+7jawPWDh6fNvFVE1zaDmYyoQ0cIOqbfA9KQjKn6mnT+DJXUizPtUcLJFGFqlD
+					Wg3EQ4l6ai2l94KpBDTJsfxug7MO2h4B04iJE88CgYEAuDUZmcUSuJg0XQkNnPm2
+					SVxk5R6u/8P8KPX8/sJLhSjZadTR7IJ+PbanHtJZxbJLfbatMlrDdXQLt5o5Huoh
+					UlZPiv4ZWJH29MHuJzYy42WJwHkbccpg4GFwZhDuVZzlFhRRlGBqO+KFxf4FcU2U
+					0E08BfQP6pgKx2sWMv2n+40CgYEAnqOfnEt3k2rbduK5OfBGUJ83/iJpjdPwNlOw
+					j4yp2QV1JfckyJ6E98oe1jXJSMGy9tBuSUWDtC3Fqe5sgLDA6NOpFHBUfwqeDdEs
+					GHNxfzAUVMG7uobD5wenvnKMKnn3b+ASh4DSnvd5H9zjKu90VP6J/kQNDiWu/0G0
+					AixG/aMCgYEA4Rxm/5MKYWBV3WsTfSLJaIVHz5BZX1tsTXzaFjOuRvUQ/+tS5Ybv
+					2rFs71mMvy+tm0Yt9pHvc/i8rB9tc8XWLJkwEJybZbRiNjHFXa2k15zMGZBzhlLO
+					6K+HhRKjIq2ZxNNtzlwE/sBOCuoYJj9olC+lPZQ08hP2KIXcnncDtV0=`
 
+	var appId = "2016092400588604"
+	var aliPublicKey = `MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAukKW0jfG3C0ZL0pDdTta
+						Wi2yhf6yP41QN3kL8HktxdnKsLws4PvRh1ddqD4mQEFQDxPjYj4kRbPQkhLjcQJz
+						ohNoLOUhpstXH+h0q7jhWbgwWpQLnwV1ktYvZ+wrA7pHmkkrvq1wpKWJRHxlG50x
+						ZZ2g2M7octL6IKpYRAx/IY3Dxn2Mvk0PArBw3/7aDEmuSIAhBqmE/+Me6kFIcOTl
+						8B1yF1ey+roPJyVABQmRCKAbP/rhh6RRUesK6lax8+G+1RjqULHZL1A+1qgG2CN0
+						VqHxEqQ86K0AnBUZLi75Ex++BWQw1v9AfB7py3DmbBOFUmtm3ZLXXzzR+YupkhKd
+						WQIDAQAB`
+
+	var client = alipay.New(appId, aliPublicKey, privateKey, false)
+
+	//alipay.trade.page.pay
+	var p = alipay.AliPayTradePagePay{}
+	p.NotifyURL = "http://192.168.111.132:8080/user/payOk"
+	p.ReturnURL = "http://192.168.111.132:8080/user/payOk"
+	p.Subject = "天天生鲜"
+	p.OutTradeNo = "1234567811"
+	p.TotalAmount = "10000.00"
+	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
+
+	var url, err = client.TradePagePay(p)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var payURL = url.String()
+
+	this.Redirect(payURL, 302)
+}
+
+func (this *OrderController) PayOK() {
+	treadNo := this.GetString("trade_no")
+	if treadNo != "" {
+		/* Receive Message
+		http://192.168.111.132:8080/user/payOk?
+		charset=utf-8&
+		out_trade_no=1234567811&
+		method=alipay.trade.page.pay.return&
+		total_amount=10000.00&
+		sign=Xsczh7hgOJcej6C9WefyamxMqCWLel943jYEx7RWHJDG%2FXUFq0Nub2v60%2FmsWQDCuZJxzbkv1BqcYPyl%2B8Baac%2BXvCM2Cxlbmmlxc7veQAt9SekQXzePnomGDhKTY3h9AQpml6HXZ2DxAGV2aLLqLzM6i0cGTZHxPtoYnnmkMS3MzR76LGltr2eYDT3UvfnfTDtRYHI4BBq%2F09FFAmtnjJEfPs7MIvOBRcEK3rD%2BnznusuX5IH9eq7M1juMZYkWz5JAdZaTACZASXhmIPdgNebXVc9R%2Fp0yGRyU2EhXhkDfD3OZbvBC8wLx6l8FQG2W1kVKkelCw2mEls9jR9vRk3A%3D%3D&
+		trade_no=2019011322001470680500694414&
+		auth_app_id=2016092400588604&
+		version=1.0&
+		app_id=2016092400588604&
+		sign_type=RSA2&
+		seller_id=2088102177119669&
+		timestamp=2019-01-13+18%3A41%3A48*/
+	}
+	this.Redirect("/goods/userCenterOrder", 302)
 }

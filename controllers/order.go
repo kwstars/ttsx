@@ -10,6 +10,7 @@ import (
 	"strings"
 	"github.com/smartwalle/alipay"
 	"fmt"
+	"github.com/KenmyZhang/aliyun-communicate"
 )
 
 type OrderController struct {
@@ -250,4 +251,32 @@ func (this *OrderController) PayOK() {
 		timestamp=2019-01-13+18%3A41%3A48*/
 	}
 	this.Redirect("/goods/userCenterOrder", 302)
+}
+
+func (this *OrderController) SendMsg() {
+	var (
+		gatewayUrl      = "http://dysmsapi.aliyuncs.com/"
+		accessKeyId     = "LTAIN9gZtWEmkc1e"
+		accessKeySecret = "H7wFlnWODmifC7DHgps21wfO5GRn1e"
+		phoneNumbers    = "1234567890"  //要发送的电话号码
+		signName        = "天天生鲜"     //签名名称
+		templateCode    = "SMS_149101793"  //模板号
+		code = "iloveyou"
+		templateParam   = "{\"code\":\""+code+"\"}"//验证码
+	)
+
+	smsClient := aliyunsmsclient.New(gatewayUrl)
+	result, err := smsClient.Execute(accessKeyId, accessKeySecret, phoneNumbers, signName, templateCode, templateParam)
+	//fmt.Println("Got raw response from server:", string(result.RawResponse))
+	if err != nil {
+		beego.Info("配置有问题")
+	}
+
+	if result.IsSuccessful() {
+		this.Ctx.WriteString("发送成功")
+		beego.Error("短信成功")
+	} else {
+		beego.Error("短信失败")
+	}
+
 }

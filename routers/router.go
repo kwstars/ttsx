@@ -42,7 +42,8 @@ func init() {
 	beego.Router("/aliPay",&controllers.OrderController{},"get:HandlePay")
 	beego.Router("/payOk",&controllers.OrderController{},"get:PayOK")
 
-
+	// 短信
+	beego.Router("/sendMsg",&controllers.OrderController{},"get:SendMsg")
 }
 
 func filterFunc(ctx *context.Context) {
